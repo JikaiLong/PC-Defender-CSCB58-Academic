@@ -1,10 +1,24 @@
+
+/* Course: CSCB58 SUMMER 2017
+   Project Name - PC defender
+   Member: Jikai Long, Michelle Pasquill
+   Data Finished: July 27th, 2017
+   Code Source:
+   Other Source Used: https://github.com/hughdingb58/b58project.git : datapath and control module
+*/
+
+
+
+
+// the following main module are from CSCB58 Lab6
 module project58
 	(
 		CLOCK_50,						//	On Board 50 MHz
 		// Your inputs and outputs here
         KEY,
         SW,
-		  HEX0,HEX1, HEX2, HEX3, HEX4,
+        	// set HEX display to display health bar
+		  HEX0,HEX1, HEX2, HEX3, HEX4, HEX6, HEX7,
 		// The ports below are for the VGA output.  Do not change.
 		VGA_CLK,   						//	VGA Clock
 		VGA_HS,							//	VGA H_SYNC
@@ -19,7 +33,7 @@ module project58
 	input			CLOCK_50;				//	50 MHz
 	input   [17:0]   SW;
 	input   [3:0]   KEY;
-	output [6:0] HEX0, HEX1, HEX2,HEX3,HEX4;
+	output [6:0] HEX0, HEX1, HEX2,HEX3,HEX4, HEX6, HEX7;
 	// Declare your inputs and outputs here
 	// Do not change the following outputs
 	output			VGA_CLK;   				//	VGA Clock
@@ -69,8 +83,8 @@ module project58
 
 
 
-
-	 reg alwaysOne = 1'b1;
+    // The main player movement module is from Jerry Liu
+    reg alwaysOne = 1'b1;
     reg alwaysZero = 1'b0;
 	 reg speed1 = 2'b00;
 	 reg speed2 = 2'b01;
@@ -90,12 +104,12 @@ module project58
     datapath d0(.clk(CLOCK_50), .ld_x(ld_x), .ld_y(ld_y), .in(  init_player_coord), .reset_n(resetn), .x(x_player), .y(y_player), .colour(colour_player), .write(writeEn_player), .stateNum(stateNum), .init_y(init_y_p), .acolour(acolour_p));
    
     // Instansiate FSM control
-    control c0(.clk(CLOCK_50), .move_r(~KEY[0]), .move_l(~KEY[3]), .move_d(~KEY[1]), .move_u(~KEY[2]), .reset_n(resetn), .ld_x(ld_x), .ld_y(ld_y), .stateNum(stateNum), .reset_game(reset_game), .dingding(counter_for_player), .how_fast(speed1));
+    control c0(.clk(CLOCK_50), .move_r(SW[2]), .move_l(SW[5]), .move_d(SW[3]), .move_u(SW[4]), .reset_n(resetn), .ld_x(ld_x), .ld_y(ld_y), .stateNum(stateNum), .reset_game(reset_game), .dingding(counter_for_player), .how_fast(speed1));
     
 
-     
-    // --------------------------------------car movement starts here, for all cars----------------------------------------------------------
-   
+    
+    // --------------------------------------virus movement starts here, for all virus---------------------------------------------------------
+    // ----------------------------------modify part of Jerry Liu's code for our use, added more modules for collision and health bar by Jikai Long
     wire ld_x_car0, ld_y_car0;
     wire [3:0] stateNum_car0;
     reg  [6:0] car0_coord = 7'b0101111;
@@ -122,7 +136,7 @@ module project58
 	 
 	 
 	 
-    //car0 movement ends here----------------------------------------------------------------------------------------------------
+    //virus0 movement ends here----------------------------------------------------------------------------------------------------
     wire ld_x_car1, ld_y_car1;
     wire [3:0] stateNum_car1;
     reg  [6:0] car1_coord = 7'b0111111;
@@ -130,7 +144,7 @@ module project58
     wire [6:0] x_car1;
     wire [6:0] y_car1;
     wire writeEn_car1;
-    reg [25:0] counter_for_car1 = 26'b00000000000000000000000001;
+    reg [25:0] counter_for_car1 = 26'b00000000000000000000000010;
     reg [6:0] init_y_c1 = 7'b0000011;
     reg [2:0] ocolour_c1 = 3'b111;
     wire [2:0] acolour_c1;
@@ -144,7 +158,7 @@ module project58
 
     // Instansiate collision generator to deal with collisions between characters added on July 15th by Jikai Long
     collision_generator collision_car1(.clock(CLOCK_50), .reset_bot(SW[9]), .player_x(x_player), .player_y(y_player), .bot_x(x_car1), .bot_y(y_car1), .bot_colour(ocolour_c1), .bot_output_colour(acolour_c1), .bot_movement(c1_movement), .hex_display(HEX1));  
-	//car1 movement ends here----------------------------------------------------------------------------------------------------
+	//virus1 movement ends here----------------------------------------------------------------------------------------------------
 
 	
 	wire ld_x_car2, ld_y_car2;
@@ -154,7 +168,7 @@ module project58
     wire [6:0] x_car2;
     wire [6:0] y_car2;
     wire writeEn_car2;
-    reg [25:0] counter_for_car2 = 26'b00000000000000000000000001;
+    reg [25:0] counter_for_car2 = 26'b00000000000000000000000011;
     reg [6:0] init_y_c2 = 7'b0000001;
     reg [2:0] ocolour_c2 = 3'b111;
     wire [2:0] acolour_c2;
@@ -168,7 +182,7 @@ module project58
 
     // Instansiate collision generator to deal with collisions between characters added on July 15th by Jikai Long
     collision_generator collision_car2(.clock(CLOCK_50), .reset_bot(SW[10]), .player_x(x_player), .player_y(y_player), .bot_x(x_car2), .bot_y(y_car2), .bot_colour(ocolour_c2), .bot_output_colour(acolour_c2), .bot_movement(c2_movement), .hex_display(HEX2));  
-	//car2 movement ends here----------------------------------------------------------------------------------------------------
+	//virus2 movement ends here----------------------------------------------------------------------------------------------------
 
 	
 	
@@ -179,7 +193,7 @@ module project58
     wire [6:0] x_car3;
     wire [6:0] y_car3;
     wire writeEn_car3;
-    reg [25:0] counter_for_car3 = 26'b00000000000000000000000001;
+    reg [25:0] counter_for_car3 = 26'b00000000000000000000000100;
     reg [6:0] init_y_c3 = 7'b0000001;
     reg [2:0] ocolour_c3 = 3'b111;
     wire [2:0] acolour_c3;
@@ -188,12 +202,12 @@ module project58
     datapath car_3_d(.clk(CLOCK_50), .ld_x(ld_x_car3), .ld_y(ld_y_car3), .in(  car3_coord), .reset_n(resetn), .x(x_car3), .y(y_car3), .colour(colour_car3), .write(writeEn_car3), .stateNum(stateNum_car3),  .init_y(init_y_c3), .acolour(acolour_c3));
    
     // Instansiate FSM control
-    control car_3_c(.clk(CLOCK_50), .move_r(1'b0), .move_l(1'b0), .move_d(c1_movement),  .move_u(1'b0), .reset_n(resetn), .ld_x(ld_x_car3), .ld_y(ld_y_car3), .stateNum(stateNum_car3), .reset_game(alwaysZero), .dingding(counter_for_car3), .how_fast(speed2));
+    control car_3_c(.clk(CLOCK_50), .move_r(1'b0), .move_l(1'b0), .move_d(c3_movement),  .move_u(1'b0), .reset_n(resetn), .ld_x(ld_x_car3), .ld_y(ld_y_car3), .stateNum(stateNum_car3), .reset_game(alwaysZero), .dingding(counter_for_car3), .how_fast(speed2));
     //The outputs are: x_car1, y_car1, colour_car1, writeEn_car1
 
     // Instansiate collision generator to deal with collisions between characters added on July 15th by Jikai Long
     collision_generator collision_car3(.clock(CLOCK_50), .reset_bot(SW[11]), .player_x(x_player), .player_y(y_player), .bot_x(x_car3), .bot_y(y_car3), .bot_colour(ocolour_c3), .bot_output_colour(acolour_c3), .bot_movement(c3_movement), .hex_display(HEX3));  
-	//car4 movement ends here----------------------------------------------------------------------------------------------------
+	//virus3 movement ends here----------------------------------------------------------------------------------------------------
 
 	wire ld_x_car4, ld_y_car4;
     wire [3:0] stateNum_car4;
@@ -202,7 +216,7 @@ module project58
     wire [6:0] x_car4;
     wire [6:0] y_car4;
     wire writeEn_car4;
-    reg [25:0] counter_for_car4 = 26'b00000000000000000000000001;
+    reg [25:0] counter_for_car4 = 26'b00000000000000000000000101;
     reg [6:0] init_y_c4 = 7'b0000001;
     reg [2:0] ocolour_c4 = 3'b111;
     wire [2:0] acolour_c4;
@@ -216,47 +230,47 @@ module project58
 
     // Instansiate collision generator to deal with collisions between characters added on July 15th by Jikai Long
     collision_generator collision_car4(.clock(CLOCK_50), .reset_bot(SW[12]), .player_x(x_player), .player_y(y_player), .bot_x(x_car4), .bot_y(y_car4), .bot_colour(ocolour_c4), .bot_output_colour(acolour_c4), .bot_movement(c4_movement), .hex_display(HEX4));  
-	//car1 movement ends here----------------------------------------------------------------------------------------------------
-
-
+	//virus4 movement ends here----------------------------------------------------------------------------------------------------
+	
+	// the following are the connection part between VGA Screen and user input from Jerry Liu arranged by Jikai
 	always @(posedge CLOCK_50)
     begin
         if(writeEn_player) 
             begin
-                writeEn <= writeEn_player;   //  Do I use   <=   or   =   ????? writeEn, x, y and colour are originally type wire, but I need to make them type reg???  ????????????????????????????????
+                writeEn <= writeEn_player;   
                 x <= x_player;       
                 y <= y_player;
-                colour = colour_player; // Notice: I made the following variable type reg: writeEn, x, y, colour
+                colour = colour_player; 
             end
-        else if (writeEn_car0)    // if player isnt moving, then let the car move
+        else if (writeEn_car0)    
             begin
                 writeEn <= writeEn_car0;    
                 x <= x_car0;                       
                 y <= y_car0;
                 colour <= colour_car0;
             end  
-		  else if (writeEn_car1)    // if player isnt moving, then let the car move
+		  else if (writeEn_car1)    
             begin
                 writeEn <= writeEn_car1;
                 x <= x_car1;                       
                 y <= y_car1;
                 colour <= colour_car1;
             end  
-		  else if (writeEn_car2)    // if player isnt moving, then let the car move
+		  else if (writeEn_car2)    
             begin
                 writeEn <= writeEn_car2;
                 x <= x_car2;                       
                 y <= y_car2;
                 colour <= colour_car2;
             end  
-		  else if (writeEn_car3)    // if player isnt moving, then let the car move
+		  else if (writeEn_car3)    
             begin
                 writeEn <= writeEn_car3;
                 x <= x_car3;                       
                 y <= y_car3;
                 colour <= colour_car3;
             end
-		  else if (writeEn_car4)    // if player isnt moving, then let the car move
+		  else if (writeEn_car4)    
             begin
                 writeEn <= writeEn_car4;
                 x <= x_car4;                       
@@ -264,11 +278,16 @@ module project58
                 colour <= colour_car4;
             end  
 	end
+
+// added the overall timer for the game by Jikai and Michelle
+timer overall_timer(.hex1(HEX6), .hex2(HEX7), .car0(c0_movement), .car1(c1_movement), .car2(c2_movement), .car3(c3_movement), .car4(c4_movement),  .clock(CLOCK_50), .reset(resetn));
 endmodule	
-// Added on Mar27 -------------
+// the arrangement of the main module is finished on 27th July, 2017
 
 
-
+/* the following module:
+control, datapath, rate_divider_for_cars are implemented by Jerry Liu and we didnt modify any of the code
+*/
 
 module control(clk, move_r, move_l, move_d, move_u, reset_n, ld_x, ld_y, stateNum, reset_game, dingding, how_fast);
     input [25:0] dingding; // dingding is the counter! It counts like this: Ding!!! Ding!!! Ding!!! Ding!!! Ding!!!
@@ -537,29 +556,31 @@ module collision_generator(clock, reset_bot, player_x, player_y, bot_x, bot_y, b
 	output reg [2:0] bot_output_colour;
 	output reg bot_movement;
 	reg [3:0] health;
+	wire [19:0] time_counter;
 	output [6:0] hex_display;
 	// triggers everytime the clock rises 
-	always @(clock)
+	always @(posedge clock)
 		begin 
 		// if the bot is reset, restore full health
 		if(reset_bot) 
 			begin
 			health <= 4'b1001;
 			end
-		// not reset and health is 0, send out the timer (hex, car0, car1, car2, car3, clock, reset);drawing colour to be black and stop its movement
+		// not reset and health is 0, drawing colour to be black and stop its movement
+		
 		else if(health == 4'b0000)
 			begin
 			bot_output_colour <= 3'd000;
 			bot_movement <= 1'b0;
 			end
 		// health is not 0 when a collision happens, decreate health by 1
-		else if(player_x == bot_x && player_y == bot_y)
+		else if(player_x == bot_x && player_y == bot_y )
 			begin
-				if(health < 4'b0011)
+				if(health == 4'b0001)
 					begin 
 					health <= 4'b0000;
 					end
-				else
+				else if(time_counter == 20'b000000000000001)
 					begin
 					health <= health -1;
 					end
@@ -572,10 +593,35 @@ module collision_generator(clock, reset_bot, player_x, player_y, bot_x, bot_y, b
 		end
 	// display health on hex_decorder
 	hex_decoder my_hex(.hex_digit(health), .segments(hex_display));
+	rate_divider_for_health_bar my_health_divider(.clock(clock), .reset(reset_bot), .count(time_counter));
 endmodule 
+
+// added on 24th July 2017 by Jikai Long, a rate divider for health bar
+module rate_divider_for_health_bar(clock, reset, count);
+	input clock, reset; 
+	output reg [19:0] count;
+	always @ (posedge clock)
+	begin
+	if(reset)
+		begin
+		count <= 20'b10000000000000000000;
+		end
+	else	
+		begin
+		if(count == 20'b00000000000000000000)
+			begin
+			count <= 20'b10000000000000000000;
+			end
+		else
+			begin
+			count <= count - 1'b1;
+			end
+		end
+	end
+endmodule		
 			
 		
-// hex display
+// hex display from previous lab
 
 module hex_decoder(hex_digit, segments);
 
@@ -625,26 +671,41 @@ module hex_decoder(hex_digit, segments);
 				endcase
 endmodule
 
-module timer (hex, car0, car1, car2, car3, clock, reset);
-	input clock;
-	input reset;
-	input [3:0] car0, car1, car2, car3;
-	output [6:0] hex;
-	reg [3:0] count = 1'd0;
-	reg [26:0] speed = 27'b111111111111111111111111111;
-	reg [26:0] out;
-	always @(posedge clock)
+
+// added on 26th July, 2017 by Michelle, an overall timer implemented for the score counter
+module timer (hex1, hex2, car0, car1, car2, car3, car4,  clock, reset);
+input clock;
+				
+input reset;
+input [0:0] car0, car1, car2, car3, car4;
+output [6:0] hex1, hex2;
+
+reg [7:0] count = 8'b00000000;
+reg [28:0] speed = 29'b0111011100110101100101010000000;
+reg [28:0] out;
+
+always @(posedge clock)
 	begin
-		if ((out == speed) && (car0 != 1'd0) && (car1 != 1'd0) && (car2 != 1'd0) && (car3 != 1'd0)) 
-			begin
-			out <= 0;
-			count <= count + 1'b1;
-			end
-		else if ((clock == 1'b1)  && (car0 != 1'd0) && (car1 != 1'd0) && (car2 != 1'd0) && (car3 != 1'd0))
-			begin
-			out <= out + 1'b1;
-			end
+		if(!reset)
+		begin
+			count <= 4'b0000;
+		end
+		else
+		begin
+			if ((out == speed) && ((car0 != 1'b0) || (car1 != 1'b0) || (car2 != 1'b0) || (car3 != 1'b0) || (car4 !=1'b0)))
+				begin
+				out <= 0;
+				count <= count + 1'b1;
+				end
+			else if ((clock == 1'b1) && ((car0 != 1'b0) || (car1 != 1'b0) || (car2 != 1'b0) || (car3 != 1'b0) || (car4 != 1'b0)))
+				begin
+				out <= out + 1'b1;
+				end
+		end
 	end
-	// Put Hex decoder here, and input count as the number.
-	hex_decoder h0 (.hex_digit(count), .segments(hex));
+
+// Put Hex decoder here, and input count as the number.
+hex_decoder first_4_digit(.hex_digit(count[3:0]), .segments(hex1));
+hex_decoder last_4_digit(.hex_digit(count[7:4]), .segments(hex2));
+
 endmodule
