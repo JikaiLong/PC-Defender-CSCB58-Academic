@@ -4,7 +4,7 @@
    Member: Jikai Long, Michelle Pasquill
    Data Finished: July 27th, 2017
    Code Source:
-   Other Source Used: https://github.com/hughdingb58/b58project.git : datapath and control module
+https://github.com/MarioLongJACK/cscb58-project   Other Source Used: https://github.com/hughdingb58/b58project.git : datapath and control module
 */
 
 
